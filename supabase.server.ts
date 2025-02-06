@@ -30,6 +30,11 @@ export function createClient(request: Request) {
   return { supabase, headers };
 }
 
+/**
+ * This function creates a Supabase client for phone-related operations.
+ * It uses the project URL and API key from environment variables.
+ */
+
 export async function getUser(request: Request) {
   let { supabase } = createClient(request);
   let {

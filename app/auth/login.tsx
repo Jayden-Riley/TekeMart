@@ -1,11 +1,14 @@
-import { data, Form, Link, redirect, useNavigation } from "react-router"; // Corrected to react-router-dom
+import { data, Form, Link, redirect, useNavigation } from "react-router";
 import { createClient } from "supabase.server";
 import { useEffect, useState } from "react";
 import { commitSession, getSession, setSuccessMessage } from "session.server";
 import { validateEmail, validatePassword } from "validation";
 import type { Route } from "./+types/login";
 
-// This function handles the form submission logic
+// Admin credentials
+// const ADMIN_EMAIL = "jaydendejong83@gmail.com";
+// const ADMIN_PASSWORD = "A1b@C3d!";
+
 export async function action({ request }: Route.ActionArgs) {
   let { supabase, headers } = createClient(request);
 
@@ -15,26 +18,22 @@ export async function action({ request }: Route.ActionArgs) {
 
   let session = await getSession(request.headers.get("Cookie"));
 
-  // Initialize fieldErrors object with optional general error field
   let fieldErrors: { email?: string; password?: string; general?: string } = {
     email: validateEmail(email),
     password: validatePassword(password),
   };
 
-  // Check if email or password validation failed
   if (!email || !password || Object.values(fieldErrors).some(Boolean)) {
     fieldErrors.general = "Please fill in all fields.";
     return data({ fieldErrors }, { status: 400 });
   }
 
-  // If credentials are correct, proceed with Supabase authentication
   let { data: userData, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
-    // Handle errors from Supabase (such as wrong credentials)
     fieldErrors.general = "Invalid email or password.";
     return data({ fieldErrors }, { status: 400 });
   }
@@ -47,13 +46,15 @@ export async function action({ request }: Route.ActionArgs) {
     setSuccessMessage(session, "logged in successfully");
   }
 
+  let isAdmin = userData.user?.role === "admin"; // Check if user is admin
+
   let allHeaders = {
     ...Object.fromEntries(headers.entries()),
     "Set-Cookie": await commitSession(session),
   };
 
-  // Redirect to dashboard instead of non-existent customer-page
-  throw redirect("/dashboard", {
+  // Redirect to the appropriate dashboard
+  throw redirect(isAdmin ? "/admin-dashboard" : "/dashboard", {
     headers: allHeaders,
   });
 }
@@ -102,9 +103,9 @@ export default function Login() {
   };
 
   return (
-    <main className="flex flex-col lg:flex-row items-center lg:items-start lg:justify-between bg-gray-100">
+    <main className="flex flex-col lg:flex-row items-center lg:items-start bg-gray-100">
       {/* Left Section */}
-      <div className="relative lg:w-1/2 w-full h-96 lg:h-screen">
+      <div className="relative w-full h-96 lg:w-1/2 lg:h-screen">
         <img
           src="https://i.pinimg.com/736x/ba/d0/81/bad081d9d69d5bc8b3d47c6c9960a76d.jpg"
           alt="Welcome Back"
@@ -116,8 +117,8 @@ export default function Login() {
       </div>
 
       {/* Right Section */}
-      <div className="lg:w-1/2 w-full flex justify-center items-center p-6 lg:p-12 bg-white shadow-lg h-full lg:h-screen">
-        <div className="max-w-sm w-full">
+      <div className="w-full lg:w-1/2 flex justify-center items-center p-6 lg:p-12 bg-white shadow-lg">
+        <div className="max-w-md w-full">
           <Form
             method="post"
             onSubmit={handleSubmit}

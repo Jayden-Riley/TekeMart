@@ -12,11 +12,14 @@ import {
 
 import type { Route } from "./+types/root"; // Import Route type for type-checking
 import stylesheet from "./app.css?url"; // Import the stylesheet for the app
-import { useEffect } from "react"; // Import useEffect hook for handling side effects
+import { useEffect, useState } from "react"; // Import useEffect hook for handling side effects
 import toast, { Toaster } from "react-hot-toast"; // Import toast notification library
 import { commitSession, getSession } from "session.server";
 import { getUser } from "supabase.server";
 import { Outlet } from "react-router";
+import SearchBar from "./components/SearchBar";
+import Footer from "./components/footer";
+import { DoorOpen, ShoppingCart } from "lucide-react";
 
 // Links function for adding external resources like stylesheets
 export const links: Route.LinksFunction = () => [
@@ -37,7 +40,9 @@ export const links: Route.LinksFunction = () => [
 export async function loader({ request }: Route.LoaderArgs) {
   // Get session from request headers
   let session = await getSession(request.headers.get("Cookie"));
-  let toastMessage = session.get("toastMessage"); // Fetch the toast message from the session
+
+  // Fetch the toast message from the session
+  let toastMessage = session.get("toastMessage");
 
   // Fetch user data from Supabase (assuming the getUser function does this)
   let { user } = await getUser(request);
@@ -46,8 +51,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   // Extract the username from the email
   let username = userEmail ? userEmail.split("@")[0] : null; // Get the part before '@'
 
+  // Return the necessary data, including the toast message and username
   return data(
-    { toastMessage, username }, // Return username instead of userEmail
+    { toastMessage, username },
     {
       headers: {
         "Set-Cookie": await commitSession(session),
@@ -78,162 +84,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
           href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&display=swap"
           rel="stylesheet" // External font stylesheet for Alegreya font
         ></link>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        />
+
         <Links />
       </head>
       <body className="bg-white  text-black">
         {children}
-        <footer className="bg-gray-800 text-white py-8">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* About Section */}
-              <div>
-                <h4 className="text-xl font-semibold mb-4 text-orange-700">
-                  About Us
-                </h4>
-                <p className="text-sm text-gray-400">
-                  At Betty's, we offer the best products and services. Check out
-                  our range of amazing items and services.
-                </p>
-              </div>
-
-              {/* Quick Links */}
-              <div>
-                <h4 className="text-xl font-semibold mb-4 text-orange-700">
-                  Quick Links
-                </h4>
-                <ul className="space-y-2">
-                  <li>
-                    <Link
-                      to="/phones"
-                      className="text-gray-400 hover:text-orange-500 duration-500 ease-in-out"
-                    >
-                      Phones
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/computer"
-                      className="text-gray-400 hover:text-orange-500 duration-500 ease-in-out"
-                    >
-                      Computer
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/cloathing"
-                      className="text-gray-400 hover:text-orange-500 duration-500 ease-in-out"
-                    >
-                      Cloathing
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/toys"
-                      className="text-gray-400 hover:text-orange-500 duration-500 ease-in-out"
-                    >
-                      Toys
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/videoGames"
-                      className="text-gray-400 hover:text-orange-500 duration-500 ease-in-out"
-                    >
-                      Video Games
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/jewelry"
-                      className="text-gray-400 hover:text-orange-500 duration-500 ease-in-out"
-                    >
-                      Jewelry
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/petSupplies"
-                      className="text-gray-400 hover:text-orange-500 duration-500 ease-in-out"
-                    >
-                      Pet Supplies
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Social Media & Newsletter */}
-              <div>
-                <h4 className="text-lg font-semibold mb-4 text-orange-700">
-                  Connect with Us
-                </h4>
-                <div className="flex space-x-4 mb-4">
-                  <Link
-                    to="https://facebook.com"
-                    target="_blank"
-                    className="text-gray-400 hover:text-blue-600"
-                  >
-                    <i className="fab fa-facebook-f"></i>
-                  </Link>
-                  <Link
-                    to="https://twitter.com"
-                    target="_blank"
-                    className="text-gray-400 hover:text-blue-400"
-                  >
-                    <i className="fab fa-twitter"></i>
-                  </Link>
-                  <Link
-                    to="https://instagram.com"
-                    target="_blank"
-                    className="text-gray-400 hover:text-pink-600"
-                  >
-                    <i className="fab fa-instagram"></i>
-                  </Link>
-                  <Link
-                    to="https://linkedin.com"
-                    target="_blank"
-                    className="text-gray-400 hover:text-blue-700"
-                  >
-                    <i className="fab fa-linkedin-in"></i>
-                  </Link>
-                  <Link
-                    to="https://github.com"
-                    target="_blank"
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <i className="fab fa-github"></i>
-                  </Link>
-                </div>
-
-                {/* Optional Newsletter */}
-                <div className="mt-4">
-                  <h5 className="text-sm font-semibold">
-                    Subscribe to our newsletter
-                  </h5>
-                  <form className="flex mt-2">
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      className="p-2 rounded-l-md w-2/3 text-gray-800"
-                    />
-                    <button
-                      type="submit"
-                      className="bg-green-600 text-white px-4 py-2 rounded-r-md hover:bg-green-700"
-                    >
-                      Subscribe
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
-
-            {/* Copyright */}
-            <div className="mt-8 text-center text-gray-500 text-sm">
-              <p>
-                &copy; {new Date().getFullYear()} Betty's. All rights reserved.
-              </p>
-            </div>
-          </div>
-        </footer>
+        <Footer />
 
         <Toaster />
         <ScrollRestoration />
@@ -244,65 +104,93 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App({ loaderData }: Route.ComponentProps) {
-  let { toastMessage, username } = loaderData; // Destructure data returned by the loader
+  const { toastMessage, username } = loaderData;
+  const location = useLocation();
+  const excludedRoutes = ["/login", "/signup", "/"];
+  const [showFilter, setShowFilter] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false); // State for toggling the mobile menu
 
-  const location = useLocation(); // Access the current route
-  const excludedRoutes = ["/login", "/signup"]; // Routes where header should not appear
-
-  // useEffect to handle displaying toast notifications when data changes
   useEffect(() => {
-    if (!toastMessage) {
-      return;
+    if (!toastMessage) return;
+    const { message, type } = toastMessage;
+    if (type === "success") {
+      toast.success(message);
     }
-    let { message, type } = toastMessage; // Extract message and type
+  }, [toastMessage]);
 
-    // Display toast based on message type
-    switch (type) {
-      case "success": {
-        toast.success(message); // Show success toast
-      }
-    }
-  }, [toastMessage]); // Re-run when toastMessage changes
+  const toggleFilter = () => {
+    setShowFilter((prevState) => !prevState);
+  };
+
+  const toggleMenu = () => {
+    setMenuOpen((prevState) => !prevState); // Toggle the mobile menu
+  };
 
   return (
     <>
-      {/* Conditionally render the header only if the current route is not in the excludedRoutes */}
       {!excludedRoutes.includes(location.pathname) && (
-        <header className="flex justify-between items-center py-4 px-6 shadow-gray-500 shadow-sm ">
-          <Link to="/dashboard" className="text-3xl font-bold text-orange-500">
-            Betty's
+        <header className="flex justify-between items-center py-4 px-6 shadow-gray-500 shadow-sm relative">
+          <Link to="/dashboard">
+            <img src="/bird.jpg" alt="" className="h-14 w-14" />
           </Link>
-          <div className="relative ">
-            <input
-              type="text"
-              placeholder="Search"
-              className="px-4 py-2 pl-10 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+
+          <div className="flex items-center space-x-4">
+            <SearchBar />
+            <div className="relative">
+              <button
+                className="flex items-center justify-center p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-300"
+                onClick={toggleFilter}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M11 17a6 6 0 100-12 6 6 0 000 12zm0 0l6 6"
-                />
-              </svg>
-            </span>
+                <i className="fas fa-filter text-gray-600"></i>
+              </button>
+              {showFilter && (
+                <div className="absolute top-full w-44 mt-5 right-0 bg-white shadow-lg p-4 rounded-md z-50">
+                  <ul>
+                    <li className="py-2 px-4 hover:bg-gray-200 cursor-pointer">
+                      <Link to={"/dashboard/phones"}>Phones</Link>
+                    </li>
+                    <li className="py-2 px-4 hover:bg-gray-200 cursor-pointer">
+                      <Link to={"/dashboard/computers"}>Computers</Link>
+                    </li>
+                    <li className="py-2 px-4 hover:bg-gray-200 cursor-pointer">
+                      <Link to={"/dashboard/electronics"}>Electronics</Link>
+                    </li>
+                    <li className="py-2 px-4 hover:bg-gray-200 cursor-pointer">
+                      <Link to={"/dashboard/toys"}>Toys</Link>
+                    </li>
+                    <li className="py-2 px-4 hover:bg-gray-200 cursor-pointer">
+                      <Link to={"/dashboard/games"}>Video Games</Link>
+                    </li>
+                    <li className="py-2 px-4 hover:bg-gray-200 cursor-pointer">
+                      <Link to={"/dashboard/petSupplies"}>Pet Supplies</Link>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Conditional rendering based on whether the user is logged in */}
-          {username ? (
-            <div className="flex justify-between items-center gap-10">
-              {/* Profile section */}
-              <div className="flex gap-5 place-items-center">
-                <span className="text-gray-700 font-semibold">{username}</span>{" "}
-                {/* Logout button */}
+          {/* Hamburger Icon for Mobile */}
+          <button className="lg:hidden text-2xl" onClick={toggleMenu}>
+            <i className={`fas ${menuOpen ? "fa-times" : "fa-bars"}`}></i>
+          </button>
+
+          {/* Cart and Profile Section for Large Devices */}
+          <div className="hidden lg:flex items-center space-x-6">
+            {username ? (
+              <div className="flex items-center space-x-5">
+                <Link to={`/dashboard/this`}>
+                  <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold shadow-md">
+                    {username ? username.charAt(0).toUpperCase() : "U"}{" "}
+                    {/* Display first letter of username */}
+                  </div>
+                </Link>
+                <Link
+                  to="/dashboard/cartItems"
+                  className="flex items-center text-xl text-gray-700"
+                >
+                  <ShoppingCart size={24} />
+                </Link>
                 <Form method="post" action="/logout">
                   <button
                     type="submit"
@@ -312,18 +200,72 @@ export default function App({ loaderData }: Route.ComponentProps) {
                   </button>
                 </Form>
               </div>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-green-600 hover:bg-green-700 transition ease-in-out duration-500 px-6 py-1 rounded-lg text-white"
+              >
+                Login
+              </Link>
+            )}
+          </div>
+
+          {/* Mobile Menu */}
+          <div
+            className={`lg:hidden fixed top-0 right-0 w-2/3 h-full bg-white shadow-lg z-50 transition-transform transform ${
+              menuOpen ? "translate-x-0" : "translate-x-full"
+            }`}
+          >
+            <div className="flex justify-between items-center p-4">
+              <Link
+                to="/dashboard"
+                className="text-3xl font-bold text-orange-500"
+              >
+                Betty's
+              </Link>
+              <button onClick={toggleMenu} className="text-2xl">
+                <i className="fas fa-times"></i>
+              </button>
             </div>
-          ) : (
-            <Link
-              to="/login"
-              className="bg-green-600 hover:bg-green-700 transition ease-in-out duration-500 px-6 py-1 rounded-lg text-white"
-            >
-              Login
-            </Link>
-          )}
+            <div className="p-4">
+              {username ? (
+                <div className="space-y-4">
+                  <Link
+                    to={`/dashboard/user`}
+                    className="block text-xl text-gray-700"
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    to="/dashboard/cartItems"
+                    className="block text-xl text-gray-700"
+                  >
+                    Cart
+                  </Link>
+                  <Form method="post" action="/logout">
+                    <button
+                      type="submit"
+                      className="w-full text-xl text-white bg-red-500 py-2 rounded-md flex items-center justify-center space-x-2"
+                    >
+                      <DoorOpen size={24} /> {/* Door icon */}
+                      <span>Log Out</span>
+                    </button>
+                  </Form>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="block text-xl text-white bg-green-600 py-2 rounded-md"
+                >
+                  Login
+                </Link>
+              )}
+            </div>
+          </div>
         </header>
       )}
-      <Outlet /> {/* Render the nested route components here */}
+
+      <Outlet />
     </>
   );
 }

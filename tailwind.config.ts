@@ -16,6 +16,19 @@ export default {
           '"Noto Color Emoji"',
         ],
       },
+      animation: {
+        typing:
+          "typing 6s steps(100) 1s forwards, blink 0.75s step-end infinite",
+      },
+      keyframes: {
+        typing: {
+          "0%": { width: "0" },
+          "100%": { width: "100%" },
+        },
+        blink: {
+          "50%": { borderColor: "transparent" },
+        },
+      },
     },
   },
   plugins: [],
